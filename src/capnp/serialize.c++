@@ -127,4 +127,32 @@ kj::Array<word> messageToFlatArray(kj::ArrayPtr<const kj::ArrayPtr<const word>> 
   return kj::mv(result);
 }
 
+void writeMessage(kj::OutputStream& output, kj::ArrayPtr<const kj::ArrayPtr<const word>> segments) {
+  KJ_REQUIRE(segments.size() > 0, "Tried to serialize uninitialized message.");
+
+  _::WireValue<uint32_t> table[(segments.size() + 2) & ~size_t(1)];
+
+  // We write the segment count - 1 because this makes the first word zero for single-segment
+  // messages, improving compression.  We don't bother doing this with segment sizes because
+  // one-word segments are rare anyway.
+  table[0].set(segments.size() - 1);
+  for (uint i = 0; i < segments.size(); i++) {
+    table[i + 1].set(segments[i].size());
+  }
+  if (segments.size() % 2 == 0) {
+    // Set padding byte.
+    table[segments.size() + 1].set(0);
+  }
+
+  KJ_STACK_ARRAY(kj::ArrayPtr<const byte>, pieces, segments.size() + 1, 4, 32);
+  pieces[0] = kj::arrayPtr(reinterpret_cast<byte*>(table), sizeof(table));
+
+  for (uint i = 0; i < segments.size(); i++) {
+    pieces[i + 1] = kj::arrayPtr(reinterpret_cast<const byte*>(segments[i].begin()),
+                                 reinterpret_cast<const byte*>(segments[i].end()));
+  }
+
+  output.write(pieces);
+}
+
 }  // namespace capnp
