@@ -11,11 +11,11 @@ set(CMAKE_CXX_COMPILER_WORKS 1)
 project(Acpica CXX)
 
 # Initialize CXXFLAGS.
-set(CMAKE_CXX_FLAGS                "-Wall -Werror -std=gnu++14")
-set(CMAKE_CXX_FLAGS_DEBUG          "-O0 -g")
+set(CMAKE_CXX_FLAGS                "-Wall -Werror -std=gnu++14 -Wno-unused-variable")
+set(CMAKE_CXX_FLAGS_DEBUG          "-O0 -g3")
 set(CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
-set(CMAKE_CXX_FLAGS_RELEASE        "-O4 -flto -DNDEBUG")
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
+set(CMAKE_CXX_FLAGS_RELEASE        "-O4 -DNDEBUG")
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g3")
 
 include_directories(include)
 
